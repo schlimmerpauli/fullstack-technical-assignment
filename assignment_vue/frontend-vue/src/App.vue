@@ -10,6 +10,11 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 // Your Vue 3 Composition API code here
+
+//TODO: FETCH THE API WITH A PLACEHOLDER FILTER OBJECT AND DISPLAY THE JSON RESPONSE
+//TODO: CREATE THE FILTER COMPONENTS AND PASS THE FILTER OBJECT TO THE API CALL UPDATE URL QUERY PARAMETERS WHEN FILTERS CHANGE
+//TODO: CREATE THE LAYOUT and Make it responsive - there is a design in the Figma file refernce
+
 </script>

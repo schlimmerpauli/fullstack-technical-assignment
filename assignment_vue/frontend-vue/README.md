@@ -19,9 +19,16 @@ The application will be available at `http://localhost:5173`
 npm run build
 ```
 
+## Type Checking
+
+```bash
+npm run typecheck
+```
+
 ## Tech Stack
 
 - **Vue 3** - Composition API with `<script setup>`
+- **TypeScript** - Static typing for Vue components and tests
 - **Vite** - Fast development server and build tool
 - **Tailwind CSS** - Utility-first CSS framework
 
