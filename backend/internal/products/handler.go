@@ -53,9 +53,18 @@ func (h *Handler) handleList(w http.ResponseWriter, r *http.Request) {
 func parseListQuery(r *http.Request) (ListQuery, error) {
 	values := r.URL.Query()
 	query := ListQuery{
-		Search: strings.TrimSpace(values.Get("search")),
-		Color:  strings.TrimSpace(values.Get("color")),
+		Search:     strings.TrimSpace(values.Get("search")),
+		Categories: parseMultiValue(values["category"]),
+		Brands:     parseMultiValue(values["brand"]),
+		Conditions: parseMultiValue(values["condition"]),
+		Color:      strings.TrimSpace(values.Get("color")),
 	}
+
+	sortOption, err := parseSortOption(values.Get("sort"))
+	if err != nil {
+		return ListQuery{}, err
+	}
+	query.Sort = sortOption
 
 	bestseller, err := parseOptionalBool(values.Get("bestseller"), "bestseller")
 	if err != nil {
@@ -100,6 +109,37 @@ func parseListQuery(r *http.Request) (ListQuery, error) {
 	}
 
 	return query, nil
+}
+
+func parseMultiValue(rawValues []string) []string {
+	values := make([]string, 0, len(rawValues))
+	for _, rawValue := range rawValues {
+		value := strings.TrimSpace(rawValue)
+		if value == "" {
+			continue
+		}
+
+		values = append(values, value)
+	}
+
+	if len(values) == 0 {
+		return nil
+	}
+
+	return values
+}
+
+func parseSortOption(raw string) (SortOption, error) {
+	value := strings.TrimSpace(strings.ToLower(raw))
+	if value == "" {
+		return SortOptionDefault, nil
+	}
+
+	if SortOption(value) == SortOptionPopularity {
+		return SortOptionPopularity, nil
+	}
+
+	return SortOptionDefault, fmt.Errorf("invalid sort: must be popularity")
 }
 
 func parseOptionalBool(raw string, fieldName string) (*bool, error) {

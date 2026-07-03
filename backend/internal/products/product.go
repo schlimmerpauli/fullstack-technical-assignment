@@ -2,12 +2,23 @@ package products
 
 type ListQuery struct {
 	Search     string      `json:"search,omitempty"`
+	Categories []string    `json:"categories,omitempty"`
+	Brands     []string    `json:"brands,omitempty"`
+	Conditions []string    `json:"conditions,omitempty"`
 	Color      string      `json:"color,omitempty"`
 	Bestseller *bool       `json:"bestseller,omitempty"`
+	Sort       SortOption  `json:"sort,omitempty"`
 	PriceRange *PriceRange `json:"priceRange,omitempty"`
 	Page       int         `json:"page"`
 	PageSize   int         `json:"pageSize"`
 }
+
+type SortOption string
+
+const (
+	SortOptionDefault    SortOption = ""
+	SortOptionPopularity SortOption = "popularity"
+)
 
 type PriceRange struct {
 	Min *float64 `json:"min,omitempty"`
@@ -40,13 +51,18 @@ type ProductVariant struct {
 	Stock           int      `json:"stock"`
 }
 
+type PopularityRanking struct {
+	ProductID string `json:"product_id"`
+	Rank      int    `json:"rank"`
+}
+
 type Product struct {
 	ID              string   `json:"id"`
 	ProductID       string   `json:"-"`
 	Name            string   `json:"name"`
-	Category        string   `json:"-"`
-	Brand           string   `json:"-"`
-	Condition       string   `json:"-"`
+	Category        string   `json:"category"`
+	Brand           string   `json:"brand"`
+	Condition       string   `json:"condition"`
 	Price           float64  `json:"price"`
 	DiscountPercent int      `json:"discount_percent"`
 	Bestseller      bool     `json:"bestseller"`

@@ -7,6 +7,7 @@ import (
 	"math"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 	"sync"
 	"time"
@@ -15,15 +16,19 @@ import (
 const repositoryCacheTTL = 30 * time.Second
 
 type Repository struct {
-	metadataPath string
-	detailsPath  string
-	cacheTTL     time.Duration
-	now          func() time.Time
+	metadataPath   string
+	detailsPath    string
+	popularityPath string
+	cacheTTL       time.Duration
+	now            func() time.Time
 
-	mu             sync.RWMutex
-	cachedProducts []Product
-	cachedAt       time.Time
-	cacheFilled    bool
+	mu                    sync.RWMutex
+	cachedProducts        []Product
+	cachedAt              time.Time
+	cacheFilled           bool
+	cachedPopularity      map[string]int
+	popularityCachedAt    time.Time
+	popularityCacheFilled bool
 }
 
 func NewRepository() *Repository {
@@ -35,10 +40,11 @@ func NewRepository() *Repository {
 
 func NewRepositoryWithPaths(metadataPath string, detailsPath string) *Repository {
 	return &Repository{
-		metadataPath: metadataPath,
-		detailsPath:  detailsPath,
-		cacheTTL:     repositoryCacheTTL,
-		now:          time.Now,
+		metadataPath:   metadataPath,
+		detailsPath:    detailsPath,
+		popularityPath: filepath.Join(filepath.Dir(metadataPath), "popularity.json"),
+		cacheTTL:       repositoryCacheTTL,
+		now:            time.Now,
 	}
 }
 
@@ -49,6 +55,14 @@ func (r *Repository) List(ctx context.Context, query ListQuery) (ListResult, err
 	}
 
 	filteredProducts := filterProducts(products, query)
+	if query.Sort == SortOptionPopularity {
+		popularityByProductID, err := r.loadPopularity(ctx)
+		if err != nil {
+			return ListResult{}, err
+		}
+
+		sortProductsByPopularity(filteredProducts, popularityByProductID)
+	}
 	paginatedProducts := paginateProducts(filteredProducts, query.Page, query.PageSize)
 
 	return ListResult{
@@ -117,6 +131,46 @@ func (r *Repository) loadDetails() ([]ProductVariant, error) {
 	return variants, nil
 }
 
+func (r *Repository) loadPopularity(ctx context.Context) (map[string]int, error) {
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
+
+	now := r.now()
+
+	r.mu.RLock()
+	if r.popularityCacheFilled && now.Sub(r.popularityCachedAt) < r.cacheTTL {
+		popularity := clonePopularityMap(r.cachedPopularity)
+		r.mu.RUnlock()
+		return popularity, nil
+	}
+	r.mu.RUnlock()
+
+	var rankings []PopularityRanking
+	if err := loadJSONFile(r.popularityPath, &rankings); err != nil {
+		return nil, fmt.Errorf("read popularity rankings: %w", err)
+	}
+
+	popularityByProductID := make(map[string]int, len(rankings))
+	for _, ranking := range rankings {
+		if ranking.ProductID == "" || ranking.Rank < 1 {
+			continue
+		}
+
+		popularityByProductID[ranking.ProductID] = ranking.Rank
+	}
+
+	cachedPopularity := clonePopularityMap(popularityByProductID)
+
+	r.mu.Lock()
+	r.cachedPopularity = cachedPopularity
+	r.popularityCachedAt = now
+	r.popularityCacheFilled = true
+	r.mu.Unlock()
+
+	return popularityByProductID, nil
+}
+
 func loadJSONFile(path string, destination any) error {
 	content, err := os.ReadFile(path)
 	if err != nil {
@@ -175,6 +229,15 @@ func filterProducts(products []Product, query ListQuery) []Product {
 		if !matchesSearch(product, query.Search) {
 			continue
 		}
+		if !matchesFilterValues(product.Category, query.Categories) {
+			continue
+		}
+		if !matchesFilterValues(product.Brand, query.Brands) {
+			continue
+		}
+		if !matchesFilterValues(product.Condition, query.Conditions) {
+			continue
+		}
 		if !matchesColor(product, query.Color) {
 			continue
 		}
@@ -189,6 +252,21 @@ func filterProducts(products []Product, query ListQuery) []Product {
 	}
 
 	return filtered
+}
+
+func matchesFilterValues(candidate string, filters []string) bool {
+	if len(filters) == 0 {
+		return true
+	}
+
+	normalizedCandidate := strings.ToLower(strings.TrimSpace(candidate))
+	for _, filter := range filters {
+		if strings.ToLower(strings.TrimSpace(filter)) == normalizedCandidate {
+			return true
+		}
+	}
+
+	return false
 }
 
 func matchesSearch(product Product, rawSearch string) bool {
@@ -268,4 +346,34 @@ func cloneProducts(products []Product) []Product {
 	}
 
 	return cloned
+}
+
+func clonePopularityMap(popularityByProductID map[string]int) map[string]int {
+	cloned := make(map[string]int, len(popularityByProductID))
+	for productID, rank := range popularityByProductID {
+		cloned[productID] = rank
+	}
+
+	return cloned
+}
+
+func sortProductsByPopularity(products []Product, popularityByProductID map[string]int) {
+	sort.SliceStable(products, func(i int, j int) bool {
+		rankI, hasRankI := popularityByProductID[products[i].ProductID]
+		rankJ, hasRankJ := popularityByProductID[products[j].ProductID]
+
+		switch {
+		case hasRankI && hasRankJ:
+			if rankI != rankJ {
+				return rankI < rankJ
+			}
+			return false
+		case hasRankI:
+			return true
+		case hasRankJ:
+			return false
+		default:
+			return false
+		}
+	})
 }

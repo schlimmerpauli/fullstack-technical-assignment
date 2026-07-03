@@ -1,0 +1,34 @@
+[
+  {
+    "product_id": "p4",
+    "rank": 1
+  },
+  {
+    "product_id": "p1",
+    "rank": 2
+  },
+  {
+    "product_id": "p2",
+    "rank": 3
+  },
+  {
+    "product_id": "p8",
+    "rank": 4
+  },
+  {
+    "product_id": "p3",
+    "rank": 5
+  },
+  {
+    "product_id": "p5",
+    "rank": 6
+  },
+  {
+    "product_id": "p7",
+    "rank": 7
+  },
+  {
+    "product_id": "p6",
+    "rank": 8
+  }
+]

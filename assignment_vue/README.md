@@ -1,29 +1,22 @@
-# Vue 3 + Tailwind Assignment
+# Vue Frontend Workspace Notes
+
+This directory contains the Vue implementation of the assignment.
+
+The primary submission documentation lives in the repository root `README.md`. Use that file for complete setup, architecture notes, production-improvement notes, and final submission context.
 
 ## Structure
 
-```
+```text
 assignment_vue/
-└── frontend-vue/    # Vue 3 + Vite + Tailwind frontend
+	frontend-vue/    Vue 3 + Vite + Tailwind application
 ```
 
-**Backend:** Use the shared `backend/` folder at the root level.
+## Local Navigation
 
-## Quick Start
+If you are already in `assignment_vue/`, the frontend app lives in `frontend-vue/` and the backend lives in the sibling `../backend/` directory.
 
-### 1. Start Backend (from root)
-```bash
-cd ../backend
-go run main.go
-```
+Frontend package README:
 
-### 2. Start Frontend
-```bash
-cd frontend-vue
-npm install
-npm run dev
-```
+- `frontend-vue/README.md`
 
-Frontend runs on: `http://localhost:5173`  
-Backend runs on: `http://localhost:8080`
 

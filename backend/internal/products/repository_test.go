@@ -116,6 +116,35 @@ func TestRepositoryListFiltersByColorAndBestseller(t *testing.T) {
 	}
 }
 
+func TestRepositoryListFiltersByCategoryBrandAndCondition(t *testing.T) {
+	repository := newTestRepository()
+
+	result, err := repository.List(context.Background(), ListQuery{
+		Categories: []string{"audio", "desktop"},
+		Brands:     []string{"apple"},
+		Conditions: []string{"excellent"},
+		Page:       1,
+		PageSize:   10,
+	})
+	if err != nil {
+		t.Fatalf("List returned error: %v", err)
+	}
+
+	if result.Pagination.Total != 4 {
+		t.Fatalf("expected four filtered products, got %d", result.Pagination.Total)
+	}
+	if len(result.Products) != 4 {
+		t.Fatalf("expected four products on page, got %d", len(result.Products))
+	}
+
+	expected := []string{"p4-excellent", "p6-excellent", "p7-excellent", "p8-excellent"}
+	for index, product := range result.Products {
+		if product.ID != expected[index] {
+			t.Fatalf("expected product %d to be %s, got %s", index, expected[index], product.ID)
+		}
+	}
+}
+
 func TestRepositoryListPaginatesResults(t *testing.T) {
 	repository := newTestRepository()
 
@@ -139,6 +168,30 @@ func TestRepositoryListPaginatesResults(t *testing.T) {
 	for index, id := range ids {
 		if id != expected[index] {
 			t.Fatalf("expected product %d to be %s, got %s", index, expected[index], id)
+		}
+	}
+}
+
+func TestRepositoryListSortsByPopularityBeforePagination(t *testing.T) {
+	repository := newTestRepository()
+
+	result, err := repository.List(context.Background(), ListQuery{
+		Sort:     SortOptionPopularity,
+		Page:     1,
+		PageSize: 6,
+	})
+	if err != nil {
+		t.Fatalf("List returned error: %v", err)
+	}
+
+	expected := []string{"p4-excellent", "p4-good", "p1-excellent", "p1-good", "p2-excellent", "p2-good"}
+	if len(result.Products) != len(expected) {
+		t.Fatalf("expected %d products on page, got %d", len(expected), len(result.Products))
+	}
+
+	for index, product := range result.Products {
+		if product.ID != expected[index] {
+			t.Fatalf("expected product %d to be %s, got %s", index, expected[index], product.ID)
 		}
 	}
 }

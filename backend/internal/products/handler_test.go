@@ -47,6 +47,26 @@ func TestHandlerRejectsInvalidQueryParameters(t *testing.T) {
 	}
 }
 
+func TestHandlerRejectsInvalidSortQueryParameter(t *testing.T) {
+	handler := newTestHandler()
+	recorder := httptest.NewRecorder()
+	request := httptest.NewRequest(http.MethodGet, "/products?sort=price", nil)
+
+	handler.ServeHTTP(recorder, request)
+
+	if recorder.Code != http.StatusBadRequest {
+		t.Fatalf("expected status %d, got %d", http.StatusBadRequest, recorder.Code)
+	}
+
+	var response ErrorResponse
+	if err := json.Unmarshal(recorder.Body.Bytes(), &response); err != nil {
+		t.Fatalf("unmarshal error response: %v", err)
+	}
+	if response.Error != "invalid sort: must be popularity" {
+		t.Fatalf("expected sort validation error, got %q", response.Error)
+	}
+}
+
 func TestHandlerReturnsProductsResponseShape(t *testing.T) {
 	handler := newTestHandler()
 	recorder := httptest.NewRecorder()
@@ -75,12 +95,12 @@ func TestHandlerReturnsProductsResponseShape(t *testing.T) {
 	if !ok {
 		t.Fatal("expected first product to be an object")
 	}
-	for _, field := range []string{"id", "name", "price", "discount_percent", "bestseller", "colors", "image_url", "stock"} {
+	for _, field := range []string{"id", "name", "category", "brand", "condition", "price", "discount_percent", "bestseller", "colors", "image_url", "stock"} {
 		if _, exists := firstProduct[field]; !exists {
 			t.Fatalf("expected product field %q in response", field)
 		}
 	}
-	for _, field := range []string{"product_id", "category", "brand", "condition"} {
+	for _, field := range []string{"product_id"} {
 		if _, exists := firstProduct[field]; exists {
 			t.Fatalf("did not expect internal product field %q in response", field)
 		}
@@ -98,6 +118,30 @@ func TestHandlerReturnsProductsResponseShape(t *testing.T) {
 	}
 	if pagination["hasMore"] != true {
 		t.Fatalf("expected hasMore true, got %v", pagination["hasMore"])
+	}
+}
+
+func TestHandlerFiltersByRepeatedCategoryAndCondition(t *testing.T) {
+	handler := newTestHandler()
+	recorder := httptest.NewRecorder()
+	request := httptest.NewRequest(http.MethodGet, "/products?category=audio&category=desktop&condition=excellent&condition=good&page=1&pageSize=20", nil)
+
+	handler.ServeHTTP(recorder, request)
+
+	if recorder.Code != http.StatusOK {
+		t.Fatalf("expected status %d, got %d", http.StatusOK, recorder.Code)
+	}
+
+	var payload ListResponse
+	if err := json.Unmarshal(recorder.Body.Bytes(), &payload); err != nil {
+		t.Fatalf("unmarshal response payload: %v", err)
+	}
+
+	if len(payload.Products) != 8 {
+		t.Fatalf("expected 8 filtered products, got %d", len(payload.Products))
+	}
+	if payload.Pagination.Total != 8 {
+		t.Fatalf("expected total 8 filtered products, got %d", payload.Pagination.Total)
 	}
 }
 

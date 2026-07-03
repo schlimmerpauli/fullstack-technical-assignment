@@ -23,7 +23,7 @@
     "condition": "excellent",
     "discount_percent": 10,
     "bestseller": true,
-    "colors": ["silver", "gray"],
+    "colors": ["black"],
     "stock": 7
   },
   {
@@ -32,7 +32,7 @@
     "condition": "good",
     "discount_percent": 18,
     "bestseller": true,
-    "colors": ["silver", "gray"],
+    "colors": ["black"],
     "stock": 5
   },
   {
@@ -41,7 +41,7 @@
     "condition": "excellent",
     "discount_percent": 12,
     "bestseller": false,
-    "colors": ["silver", "blue", "pink"],
+    "colors": ["black", "blue", "red"],
     "stock": 11
   },
   {
@@ -50,7 +50,7 @@
     "condition": "good",
     "discount_percent": 20,
     "bestseller": false,
-    "colors": ["silver", "blue", "pink"],
+    "colors": ["black", "blue", "red"],
     "stock": 12
   },
   {
@@ -77,7 +77,7 @@
     "condition": "excellent",
     "discount_percent": 0,
     "bestseller": false,
-    "colors": ["black", "silver", "blue"],
+    "colors": ["black", "blue"],
     "stock": 10
   },
   {
@@ -86,7 +86,7 @@
     "condition": "good",
     "discount_percent": 10,
     "bestseller": false,
-    "colors": ["black", "silver", "blue"],
+    "colors": ["black", "blue"],
     "stock": 8
   },
   {
@@ -95,7 +95,7 @@
     "condition": "excellent",
     "discount_percent": 5,
     "bestseller": false,
-    "colors": ["silver", "blue", "green", "pink"],
+    "colors": ["black", "blue", "green", "red"],
     "stock": 4
   },
   {
@@ -104,7 +104,7 @@
     "condition": "good",
     "discount_percent": 12,
     "bestseller": false,
-    "colors": ["silver", "blue", "green", "pink"],
+    "colors": ["black", "blue", "green", "red"],
     "stock": 4
   },
   {
@@ -113,7 +113,7 @@
     "condition": "excellent",
     "discount_percent": 12,
     "bestseller": false,
-    "colors": ["silver"],
+    "colors": ["black"],
     "stock": 8
   },
   {
@@ -122,7 +122,7 @@
     "condition": "good",
     "discount_percent": 20,
     "bestseller": false,
-    "colors": ["silver"],
+    "colors": ["black"],
     "stock": 7
   },
   {
@@ -131,7 +131,7 @@
     "condition": "excellent",
     "discount_percent": 0,
     "bestseller": false,
-    "colors": ["white", "blue", "orange"],
+    "colors": ["white", "blue", "red"],
     "stock": 35
   },
   {
@@ -140,7 +140,7 @@
     "condition": "good",
     "discount_percent": 8,
     "bestseller": false,
-    "colors": ["white", "blue", "orange"],
+    "colors": ["white", "blue", "red"],
     "stock": 32
   }
 ]

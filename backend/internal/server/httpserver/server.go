@@ -17,7 +17,7 @@ func New(cfg *config.Config) *Server {
 	productRepository := products.NewRepository()
 	productService := products.NewService(productRepository)
 	productHandler := products.NewHandler(productService)
-	router := NewRouter(productHandler)
+	router := NewRouter(cfg, productHandler)
 	addr := fmt.Sprintf("%s:%s", cfg.ServerHost, cfg.ServerPort)
 
 	return &Server{
