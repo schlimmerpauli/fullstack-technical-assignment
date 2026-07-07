@@ -1,4 +1,4 @@
-# Refurbed Fullstack Assignment Submission
+# Fullstack Assignment Submission
 
 This repository contains a Go backend and a Vue 3 + Tailwind frontend for the Refurbed product discovery assignment.
 
